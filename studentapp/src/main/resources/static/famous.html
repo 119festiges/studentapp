@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <title>Sikeres emberek</title>
+
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/animations.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    <script src="/ai.js"></script>
+    <style>
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-top: 40px;
+        }
+
+        .person-card {
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .person-card img {
+            width: 100%;
+            height: 170px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+
+        .detail-box {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .detail-box.active {
+            display: block;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+
+<body>
+>
+<h1>Sikeres emberek tanulási módszerei</h1>
+
+<div class="grid">
+
+    <div class="card person-card" onclick="openPerson('elon')">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/4/49/Elon_Musk_2015.jpg" alt="Elon Musk">
+        <h3>Elon Musk</h3>
+    </div>
+
+    <div class="card person-card" onclick="openPerson('bill')">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a0/Bill_Gates_2018.jpg">
+        <h3>Bill Gates</h3>
+    </div>
+
+    <div class="card person-card" onclick="openPerson('einstein')">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/d/d3/Albert_Einstein_Head.jpg">
+        <h3>Albert Einstein</h3>
+    </div>
+
+    <div class="card person-card" onclick="openPerson('jobs')">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/f/f5/Steve_Jobs_Headshot_2010-CROP2.jpg">
+        <h3>Steve Jobs</h3>
+    </div>
+
+</div>
+
+<!-- DETAIL -->
+<div id="detail" class="card detail-box"></div>
+
+<script>
+    const data = {
+        elon: {
+            title: "Elon Musk",
+            text: "First principles thinking: mindent alapokra bont, és onnan épít fel új megoldásokat.",
+            method: "Ne tanulj bemagolva. Bontsd le a problémát alap igazságokra és építsd újra."
+        },
+        bill: {
+            title: "Bill Gates",
+            text: "Rendszeres olvasás, jegyzetelés és mély fókusz.",
+            method: "Napi fókuszált tanulás telefon nélkül, ismétléssel."
+        },
+        einstein: {
+            title: "Albert Einstein",
+            text: "Képzeleti kísérletek és vizuális gondolkodás.",
+            method: "Képzeld el a problémát fejben vizuálisan."
+        },
+        jobs: {
+            title: "Steve Jobs",
+            text: "Egyszerűség és fókusz a lényegre.",
+            method: "Tanulj kevesebb dolgot, de mélyebben."
+        }
+    };
+
+    function openPerson(key) {
+        const person = data[key];
+
+        document.getElementById("detail").innerHTML = `
+            <h2>${person.title}</h2>
+            <p>${person.text}</p>
+            <p>${person.method}</p>
+            <button onclick="generateAI('${key}')">AI elemzés</button>
+        `;
+
+        document.getElementById("detail").classList.add("active");
+        window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+    }
+
+    function generateAI(key) {
+        const person = data[key];
+
+        fetch('http://localhost:8081/api/summarize', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                text: `
+Explain this learning method in detail and create a structured daily study plan.
+
+Rules:
+Do not use markdown, no stars, no bullet points.
+Write clean, clear paragraphs.
+
+Person: ${person.title}
+Method: ${person.text}
+`
+            })
+        })
+            .then(res => res.text())
+            .then(data => {
+                const clean = data.replace(/\*/g, "").trim();
+
+                document.getElementById("detail").innerHTML += `
+                <hr>
+                <h3>AI elemzés</h3>
+                <p>${clean}</p>
+            `;
+            });
+    }
+</script>
+
+</body>
+</html>

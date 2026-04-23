@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Tanulás</title>
+    <link rel="stylesheet" href="/animations.css">
+    <link rel="stylesheet" href="/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            background: #0f172a;
+            color: white;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            margin-top: 60px;
+            background: #1e293b;
+            padding: 30px;
+            border-radius: 16px;
+            width: 600px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            border-radius: 10px;
+            border: none;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 8px;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: #3b82f6;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #2563eb;
+        }
+
+        #result {
+            margin-top: 20px;
+            background: #0f172a;
+            padding: 15px;
+            border-radius: 10px;
+            white-space: pre-wrap;
+        }
+
+        .xp-popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #22c55e;
+            color: white;
+            padding: 12px 18px;
+            border-radius: 12px;
+            display: none;
+            z-index: 9999;
+        }
+
+        #bar {
+            height: 10px;
+            background: #3b82f6;
+            width: 0%;
+            margin-top: 10px;
+            border-radius: 10px;
+            transition: 0.3s;
+        }
+
+        #badge {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Jegyzet elemző</h1>
+
+    <textarea id="note" placeholder="Írd ide a jegyzeted..."></textarea>
+
+    <select id="mode">
+        <option value="short">Rövid összefoglalás</option>
+        <option value="long">Részletes összefoglalás</option>
+    </select>
+
+    <button onclick="summarize()">Összefoglalás</button>
+    <button onclick="generateKeywords()">Kulcsszavak</button>
+    <button onclick="generateQuestions()">Kérdések</button>
+
+    <div id="result"></div>
+
+    <div id="bar"></div>
+    <div id="badge">Level: Beginner</div>
+
+</div>
+
+<div id="xpPopup" class="xp-popup"></div>
+
+<script>
+
+    function showXP(points) {
+        const popup = document.getElementById("xpPopup");
+        popup.innerText = "+" + points + " XP";
+        popup.style.display = "block";
+
+        setTimeout(() => {
+            popup.style.display = "none";
+        }, 1500);
+    }
+
+    function updateBar(level) {
+        document.getElementById("bar").style.width = (level * 10) + "%";
+    }
+
+    function updateBadge(level) {
+        let title = "Beginner";
+
+        if (level >= 5) title = "Learner";
+        if (level >= 10) title = "Advanced";
+        if (level >= 20) title = "Master";
+
+        document.getElementById("badge").innerText = "Level: " + title;
+    }
+
+    // 💥 XP HELPER (ÚJ)
+    function sendXP(activity, noteLength) {
+        fetch("http://localhost:8081/api/progress/mission", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                activity: activity,
+                textLength: noteLength
+            })
+        })
+            .then(res => res.json())
+            .then(data => {
+                showXP(data.points);
+                updateBar(data.level);
+                updateBadge(data.level);
+            });
+    }
+
+    function summarize() {
+        const note = document.getElementById("note").value;
+        const mode = document.getElementById("mode").value;
+
+        document.getElementById("result").innerText = "Feldolgozás...";
+
+        callAI("summary", "mode=" + mode + "\n" + note, function(result) {
+            document.getElementById("result").innerText = result;
+
+            sendXP("summarize", note.length);
+        });
+    }
+
+    function generateKeywords() {
+        const note = document.getElementById("note").value;
+
+        document.getElementById("result").innerText = "Kulcsszavak...";
+
+        callAI("keywords", note, function(result) {
+            document.getElementById("result").innerText = result;
+
+            sendXP("keywords", note.length);
+        });
+    }
+
+    function generateQuestions() {
+        const note = document.getElementById("note").value;
+
+        document.getElementById("result").innerText = "Kérdések...";
+
+        callAI("questions", note, function(result) {
+            document.getElementById("result").innerText = result;
+
+            sendXP("questions", note.length);
+        });
+    }
+
+</script>
+
+<script src="/ai.js"></script>
+
+</body>
+</html>

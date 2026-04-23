@@ -1,0 +1,256 @@
+/* ===== GLOBAL ===== */
+
+/* ===== GLOBAL APP STYLE ===== */
+body {
+    font-family: 'Poppins', Arial, sans-serif;
+    margin: 0;
+    background: radial-gradient(circle at top, #1e293b, #0f172a);
+    color: #e2e8f0;
+}
+
+/* ===== CARD SYSTEM ===== */
+.card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    transition: 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    background: rgba(255,255,255,0.08);
+}
+
+/* ===== BUTTONS ===== */
+button {
+    background: #3b82f6;
+    border: none;
+    padding: 10px 55px;
+    border-radius: 10px;
+    color: white;
+    cursor: pointer;
+    transition: 0.2s ease;
+    margin-top: 25px;
+}
+
+
+button:hover {
+    transform: scale(1.05);
+    background: #2563eb;
+}
+
+/* ===== TOPBAR ===== */
+.topbar {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    gap: 10px;
+    z-index: 999;
+}
+
+.topbar button {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.topbar button:hover {
+    transform: translateY(-2px);
+}
+
+/* ===== INPUTS ===== */
+textarea, select {
+    width: 100%;
+    border-radius: 10px;
+    padding: 10px;
+    border: none;
+    background: rgba(0,0,0,0.3);
+    color: white;
+}
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+}
+
+body {
+    font-family: 'Poppins', Arial, sans-serif;
+    background: radial-gradient(circle at top, #1e293b, #0f172a);
+    color: #e2e8f0;
+    animation: pageFade 0.4s ease;
+}
+
+/* ===== PAGE ANIMATION ===== */
+@keyframes pageFade {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== TOPBAR ===== */
+.topbar {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    display: flex;
+    gap: 10px;
+    z-index: 1000;
+}
+
+.topbar button {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 8px 14px;
+    border-radius: 10px;
+    color: white;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+}
+
+.topbar button:hover {
+    transform: translateY(-2px) scale(1.05);
+    background: rgba(255,255,255,0.12);
+}
+
+/* ===== CONTAINER ===== */
+.container {
+    margin-top: 90px;
+    width: 560px;
+    padding: 30px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    animation: fadeInUp 0.5s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== INPUTS ===== */
+textarea, select {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(0,0,0,0.2);
+    color: white;
+    padding: 12px;
+    margin-top: 10px;
+    outline: none;
+}
+
+/* ===== BUTTONS ===== */
+button.action {
+    width: 100%;
+    margin-top: 10px;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    font-size: 15px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+button.action:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 25px rgba(59,130,246,0.4);
+}
+
+button.action:active {
+    transform: scale(0.98);
+}
+
+/* ===== RESULT BOX ===== */
+#resultBox {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 14px;
+    background: rgba(0,0,0,0.25);
+    border: 1px solid rgba(255,255,255,0.08);
+    min-height: 60px;
+}
+
+/* ===== LOADER ===== */
+.loader {
+    border: 4px solid #1e293b;
+    border-top: 4px solid #3b82f6;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    animation: spin 1s linear infinite, pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.6; transform: scale(0.95); }
+    50% { opacity: 1; transform: scale(1.05); }
+}
+
+/* ===== TEXT ===== */
+h1 {
+    font-size: 26px;
+    margin-bottom: 10px;
+}
+
+p {
+    color: #94a3b8;
+}
+
+.xp-popup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #22c55e;
+    color: white;
+    padding: 12px 18px;
+    border-radius: 12px;
+    display: none;
+    animation: pop 0.5s ease;
+    z-index: 9999;
+}
+
+@keyframes pop {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.progress {
+    width: 100%;
+    height: 10px;
+    background: #1e293b;
+    border-radius: 10px;
+    margin-top: 15px;
+}
+
+#bar {
+    height: 100%;
+    width: 0%;
+    background: #3b82f6;
+    border-radius: 10px;
+    transition: 0.3s;
+}
