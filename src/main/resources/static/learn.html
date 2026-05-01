@@ -1,93 +1,80 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Tanulás</title>
-    <link rel="stylesheet" href="/animations.css">
-    <link rel="stylesheet" href="/style.css">
+    <title>Smart Learning AI</title>
+
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
 
     <style>
         body {
-            font-family: 'Poppins', Arial, sans-serif;
-            background: #0f172a;
-            color: white;
             margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to bottom right, #020617, #0f172a, #020617);
+            color: white;
             display: flex;
             justify-content: center;
+            padding: 40px;
         }
 
         .container {
-            margin-top: 60px;
-            background: #1e293b;
+            width: 650px;
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(51, 65, 85, 0.6);
+            border-radius: 18px;
             padding: 30px;
-            border-radius: 16px;
-            width: 600px;
+            backdrop-filter: blur(10px);
+        }
+
+        textarea, select {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid rgba(51,65,85,0.6);
+            background: rgba(15,23,42,0.7);
+            color: white;
+            padding: 12px;
+            margin-bottom: 12px;
         }
 
         textarea {
-            width: 100%;
-            height: 150px;
-            border-radius: 10px;
-            border: none;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-
-        select {
-            width: 100%;
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 10px;
+            height: 160px;
+            resize: none;
         }
 
         button {
             width: 100%;
-            margin-top: 8px;
             padding: 12px;
             border: none;
-            border-radius: 10px;
-            background: #3b82f6;
-            color: white;
+            border-radius: 12px;
             cursor: pointer;
+            background: linear-gradient(to right, #3b82f6, #06b6d4);
+            color: white;
+            font-weight: 600;
+            margin-top: 8px;
         }
 
-        button:hover {
-            background: #2563eb;
+        .row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .row button {
+            width: 100%;
         }
 
         #result {
             margin-top: 20px;
-            background: #0f172a;
+            background: rgba(15,23,42,0.8);
             padding: 15px;
-            border-radius: 10px;
-            white-space: pre-wrap;
-        }
-
-        .xp-popup {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #22c55e;
-            color: white;
-            padding: 12px 18px;
             border-radius: 12px;
-            display: none;
-            z-index: 9999;
+            white-space: pre-wrap;
+            min-height: 100px;
         }
 
-        #bar {
-            height: 10px;
-            background: #3b82f6;
-            width: 0%;
-            margin-top: 10px;
-            border-radius: 10px;
-            transition: 0.3s;
-        }
-
-        #badge {
-            margin-top: 10px;
-            font-weight: bold;
+        #xpBox {
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #93c5fd;
         }
     </style>
 </head>
@@ -96,112 +83,186 @@
 
 <div class="container">
 
-    <h1>Jegyzet elemző</h1>
+    <h1>Smart Learning AI</h1>
 
-    <textarea id="note" placeholder="Írd ide a jegyzeted..."></textarea>
+    <div id="xpBox">XP: loading...</div>
+
+    <textarea id="note" placeholder="Paste your text here..."></textarea>
 
     <select id="mode">
-        <option value="short">Rövid összefoglalás</option>
-        <option value="long">Részletes összefoglalás</option>
+        <option value="short">Short summary</option>
+        <option value="long">Detailed summary</option>
     </select>
 
-    <button onclick="summarize()">Összefoglalás</button>
-    <button onclick="generateKeywords()">Kulcsszavak</button>
-    <button onclick="generateQuestions()">Kérdések</button>
+    <button onclick="summarize()">Generate Summary</button>
+
+    <div class="row">
+        <button onclick="generateKeywords()">Keywords</button>
+        <button onclick="generateQuestions()">Questions</button>
+    </div>
 
     <div id="result"></div>
 
-    <div id="bar"></div>
-    <div id="badge">Level: Beginner</div>
-
 </div>
 
-<div id="xpPopup" class="xp-popup"></div>
+<script type="module">
 
-<script>
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import {
+        getAuth,
+        onAuthStateChanged,
+        setPersistence,
+        browserLocalPersistence
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-    function showXP(points) {
-        const popup = document.getElementById("xpPopup");
-        popup.innerText = "+" + points + " XP";
-        popup.style.display = "block";
+    import {
+        getFirestore,
+        doc,
+        getDoc,
+        updateDoc,
+        increment,
+        setDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-        setTimeout(() => {
-            popup.style.display = "none";
-        }, 1500);
-    }
+    /* 🔥 FIREBASE CONFIG (IDE KELL VALÓDI) */
+    const firebaseConfig = {
+        apiKey: "AIzaSyBNeDo_weW1EdcDd-UdYcb4VikuW1dJDgc",
+        authDomain: "study-app-c2f91.firebaseapp.com",
+        projectId: "study-app-c2f91",
+        storageBucket: "study-app-c2f91.firebasestorage.app",
+        messagingSenderId: "547026058302",
+        appId: "1:547026058302:web:24e28e5d48a5e29827256f",
+        measurementId: "G-XFY7ML221S"
+    };
 
-    function updateBar(level) {
-        document.getElementById("bar").style.width = (level * 10) + "%";
-    }
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    function updateBadge(level) {
-        let title = "Beginner";
+    let currentUser = null;
 
-        if (level >= 5) title = "Learner";
-        if (level >= 10) title = "Advanced";
-        if (level >= 20) title = "Master";
+    setPersistence(auth, browserLocalPersistence);
 
-        document.getElementById("badge").innerText = "Level: " + title;
-    }
+    async function ensureUserDoc(uid, email) {
+        const ref = doc(db, "users", uid);
+        const snap = await getDoc(ref);
 
-    // 💥 XP HELPER (ÚJ)
-    function sendXP(activity, noteLength) {
-        fetch("http://localhost:8081/api/progress/mission", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                activity: activity,
-                textLength: noteLength
-            })
-        })
-            .then(res => res.json())
-            .then(data => {
-                showXP(data.points);
-                updateBar(data.level);
-                updateBadge(data.level);
+        if (!snap.exists()) {
+            await setDoc(ref, {
+                email: email,
+                xp: 0,
+                level: 1
             });
+        }
     }
 
-    function summarize() {
+    async function addXP(amount) {
+        if (!currentUser) {
+            console.log("NO USER -> XP NOT ADDED");
+            return;
+        }
+
+        try {
+            const ref = doc(db, "users", currentUser.uid);
+
+            await updateDoc(ref, {
+                xp: increment(amount)
+            });
+
+            loadXP();
+
+            console.log("XP +", amount);
+
+        } catch (e) {
+            console.error("XP ERROR:", e);
+        }
+    }
+
+    async function loadXP() {
+        if (!currentUser) return;
+
+        const ref = doc(db, "users", currentUser.uid);
+        const snap = await getDoc(ref);
+
+        document.getElementById("xpBox").innerText =
+            "XP: " + (snap.data()?.xp || 0);
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+
+        console.log("AUTH:", user);
+
+        if (user) {
+            currentUser = user;
+
+            await ensureUserDoc(user.uid, user.email);
+
+            loadXP();
+        } else {
+            currentUser = null;
+            document.getElementById("xpBox").innerText = "XP: 0";
+        }
+    });
+
+    function fakeAI(type, text) {
+
+        const cleaned = text.trim();
+        if (!cleaned) return "Please enter text first.";
+
+        if (type === "summary") {
+            return "SUMMARY:\n\n" +
+                cleaned.split(".").slice(0, 3).join(". ");
+        }
+
+        if (type === "keywords") {
+            const words = cleaned
+                .replace(/[^a-zA-ZáéíóöőüűÁÉÍÓÖŐÜŰ ]/g, "")
+                .split(" ")
+                .filter(w => w.length > 5)
+                .slice(0, 10);
+
+            return "KEYWORDS:\n\n- " + words.join("\n- ");
+        }
+
+        if (type === "questions") {
+            return "QUESTIONS:\n\n" +
+                "1. What is the main idea?\n" +
+                "2. Explain it in your own words.\n" +
+                "3. What are key concepts?\n" +
+                "4. How can it be used?\n" +
+                "5. What is important?";
+        }
+    }
+
+    window.summarize = function () {
         const note = document.getElementById("note").value;
         const mode = document.getElementById("mode").value;
 
-        document.getElementById("result").innerText = "Feldolgozás...";
+        document.getElementById("result").innerText =
+            fakeAI("summary", note);
 
-        callAI("summary", "mode=" + mode + "\n" + note, function(result) {
-            document.getElementById("result").innerText = result;
+        addXP(mode === "long" ? 15 : 10);
+    };
 
-            sendXP("summarize", note.length);
-        });
-    }
-
-    function generateKeywords() {
+    window.generateKeywords = function () {
         const note = document.getElementById("note").value;
 
-        document.getElementById("result").innerText = "Kulcsszavak...";
+        document.getElementById("result").innerText =
+            fakeAI("keywords", note);
 
-        callAI("keywords", note, function(result) {
-            document.getElementById("result").innerText = result;
+        addXP(5);
+    };
 
-            sendXP("keywords", note.length);
-        });
-    }
-
-    function generateQuestions() {
+    window.generateQuestions = function () {
         const note = document.getElementById("note").value;
 
-        document.getElementById("result").innerText = "Kérdések...";
+        document.getElementById("result").innerText =
+            fakeAI("questions", note);
 
-        callAI("questions", note, function(result) {
-            document.getElementById("result").innerText = result;
-
-            sendXP("questions", note.length);
-        });
-    }
+        addXP(8);
+    };
 
 </script>
-
-<script src="/ai.js"></script>
 
 </body>
 </html>
